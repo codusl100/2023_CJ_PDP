@@ -11,22 +11,19 @@ def load_data():
 
     # CSV 파일 읽어오기
     data = []
-    with open('C:\pythonProject4\CJ\data\\od_matrix.csv', 'r') as file:
+    with open('C:\pythonProject4\data\\od_matrix.csv', 'r') as file:
         reader = csv.reader(file)
         next(reader)  # 헤더 행 스킵
         for row in reader:
             data.append(row)
 
     # pickle 파일로 저장
-    with open('od_matrix.pkl', 'wb') as file:
+    with open('C:\pythonProject4\data\\od_matrix.pkl', 'wb') as file:
         pickle.dump(data, file)
 
 def calculate_distance_time(departure, destination):
+    load_data()  # 데이터 로드
     global data
-    if data is None:
-        # pickle 파일 로드
-        with open('od_matrix.pkl', 'rb') as file:
-            data = pickle.load(file)
 
     for row in data:
         if row[0] == departure and row[1] == destination:

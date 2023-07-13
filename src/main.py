@@ -3,8 +3,8 @@ import prob_builder as prob
 import solver
 
 # CSV 파일을 데이터프레임으로 로드
-df_order = pd.read_csv('C:\pythonProject4\CJ\data\\new_orders.csv', encoding='cp949')
-df_car = pd.read_csv('C:\pythonProject4\CJ\data\\new_vehicle.csv', encoding='cp949')
+df_order = pd.read_csv('C:\pythonProject4\data\\new_orders.csv', encoding='cp949')
+df_car = pd.read_csv('C:\pythonProject4\data\\new_vehicle.csv', encoding='cp949')
 
 def LoadProb():
     ThisProb = prob.Prob_Instance()
