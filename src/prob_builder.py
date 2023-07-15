@@ -1,5 +1,6 @@
 import copy
 import distance
+from datetime import datetime, timedelta
 
 class Prob_Instance:
     def __init__(self):
@@ -17,7 +18,8 @@ class Order: # 입력 데이터: car (요청)
         self.final_coord = [arrive_latitude,arrive_longitude]   # 도착지 좌표
         self.arrive_id = arrive_ID  # 도착지 ID
         self.cbm = CBM  # 상품 CBM
-        self.time_window = [start_tw, end_tw]   # 하차 가능시간
+        self.time_window = [datetime.strptime(start_tw, "%H:%M").time(),
+                            datetime.strptime(end_tw, "%H:%M").time()]  # 하차 가능시간
         self.work_time = work_time      # 하차 작업시간
         self.terminal_ID = terminal_ID  # 터미널ID (출발지)
         self.start_coord = [start_latitude, start_longitude] # 터미널 좌표
@@ -73,18 +75,28 @@ class Car: # 이동 차량
         self.conut += 1
         self.coord = target.start_coord
         self.served_order.append(target)
+        self.start_center = target.terminal_ID
+        self.can_move = False
+        target.vehicle_id = self.vehicle_id
 
     def unloading(self, target: Order):     # 하차 작업
-        self.volume = 0
+        self.volume = 0     # 차량 적재량 0으로 만들기
+        dist, time = distance.calculate_distance_time(self.start_center, target.arrive_id)
+        self.travel_distance += dist
+        self.travel_time += time
+        self.start_center = target.arrive_id
+        self.can_move = True
+
 
     def doable(self, target: Order) -> bool: # -> return 값 힌트
         if target.delivered:    # 아직 미완료 주문만 처리
             return False
+        # elif self.can_move == False:
+        #     return False
         elif self.max_capa < self.volume + target.cbm:  # 상품을 차에 실을 수 있는지 (적재량)
             return False
-
+        #elif target.time_window[1] < self.dist + 출발시간
         # 이동 시간 고려 조건 추가
-
         else:
             return True
 

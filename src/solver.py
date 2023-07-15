@@ -13,10 +13,11 @@ def rule_solver(prob_instance):
         car.initialize()
 
     group_time_windows = {
-        0: ["0:00", "18:00"],     # 각 그룹 별 처리 가능한 하차 가능 시간대
-        1: ["07:00", "10:00"],
-        2: ["07:00", "10:00", "13:00"],
-        3: ["13:00", "18:00"]
+        0: [datetime.strptime("00:00", "%H:%M").time(), datetime.strptime("18:00", "%H:%M").time()],
+        1: [datetime.strptime("07:00", "%H:%M").time(), datetime.strptime("10:00", "%H:%M").time()],
+        2: [datetime.strptime("07:00", "%H:%M").time(), datetime.strptime("10:00", "%H:%M").time(),
+            datetime.strptime("13:00", "%H:%M").time()],
+        3: [datetime.strptime("13:00", "%H:%M").time(), datetime.strptime("18:00", "%H:%M").time()]
     }
 
     filtered_orders = [     # ex) 그룹이 0이고, 5월1일, 타임 윈도우 안에 들어오는 것들
