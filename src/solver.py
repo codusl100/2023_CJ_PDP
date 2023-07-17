@@ -20,26 +20,57 @@ def rule_solver(prob_instance):
         3: [datetime.strptime("13:00", "%H:%M").time(), datetime.strptime("18:00", "%H:%M").time()]
     }
 
-    filtered_orders = [     # ex) 그룹이 0이고, 5월1일, 타임 윈도우 안에 들어오는 것들
-        order for order in prob_instance.ord_list
-        if order.group == 0 and order.date == '2023-05-01' and order.time_window[0] in group_time_windows[0]
-    ]
+    date_list = [
+        '2023-05-01',
+        '2023-05-02',
+        '2023-05-03',
+        '2023-05-04',
+        '2023-05-05',
+        '2023-05-06'
+    ]  # 처리할 날짜 리스트
 
     a = 0
+    b = 0
 
-    for order in filtered_orders:
-        for car in prob_instance.car_list:
-            if car.doable(order) and order.terminal_ID == car.start_center: # 차가 상품을 실을 수 있고, 상품의 위치랑 차의 위치가 동일한 경우
-                car.loading(order)
-                print("차량:", car, "-> 주문:", order)
+    for date in date_list:
+        for group in range(4):
+            group_orders = [
+                order for order in prob_instance.ord_list
+                if order.group == group and order.date == date and order.time_window[0] in group_time_windows[group]
+            ]
+
+            for order in group_orders:   # 상차 작업
+                filtered_cars = list(
+                    filter(lambda car: car.start_center == order.terminal_ID and car.doable(order), prob_instance.car_list))
+
+                if filtered_cars:
+                    closest_car = min(
+                        filtered_cars,
+                        key=lambda car: distance.calculate_distance_time(car.start_center, order.terminal_ID)[0]
+                    )
+                else:
+                    closest_car = min(
+                        filter(lambda car: car.doable(order), prob_instance.car_list),
+                        key=lambda car: distance.calculate_distance_time(car.start_center, order.terminal_ID)[0]
+                    )
+
+                closest_car.loading(order)
                 a += 1
-                break
 
-    print('총 처리 주문 수:', a)
+            for car in prob_instance.car_list:  # 하차 작업
+                if car.can_move == False:
+                    for order in car.served_order:
+                        if order in group_orders:
+                            car.unloading(order)
+                            b += 1
+        print(date, '총 상차 주문 수:', a)
+        print(date, '총 하차 주문 수:', b)
+        a = 0
+        b = 0
 
     objective = 0
     for car in car_list:    # 운영비용 계산
-        objective += car.total_fixed_cost + car.total_variable_cost
+        objective += car.total_fixed_cost + car.travel_distance * car.variable_cost
 
     solution = {}
     solution['Objective'] = objective

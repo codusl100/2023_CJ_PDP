@@ -9,7 +9,7 @@ df_car = pd.read_csv('C:\pythonProject4\data\\new_vehicle.csv', encoding='cp949'
 def LoadProb():
     ThisProb = prob.Prob_Instance()
     ThisProb.ord_list = [prob.Order(*row) for _, row in df_order.iterrows()]
-    ThisProb.car_list = [prob.Car(row[0], row[4], row[5],row[6], row[7], row[8], row[9]) for _, row in df_car.iterrows()]
+    ThisProb.car_list = [prob.Car(row[0], row[4], row[5],row[6], row[7]) for _, row in df_car.iterrows()]
     return ThisProb
 
 if __name__ == '__main__':

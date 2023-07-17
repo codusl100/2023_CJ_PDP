@@ -13,7 +13,7 @@ class Prob_Instance:
 
 class Order: # 입력 데이터: car (요청)
     def __init__(self, ORD_NO, arrive_latitude, arrive_longitude, arrive_ID, CBM, start_tw, end_tw, work_time,
-                 terminal_ID, date, Group, start_latitude, start_longitude):
+                 terminal_ID, date, Group):
         self.ord_no = ORD_NO    # 주문 ID
         self.final_coord = [arrive_latitude,arrive_longitude]   # 도착지 좌표
         self.arrive_id = arrive_ID  # 도착지 ID
@@ -22,7 +22,7 @@ class Order: # 입력 데이터: car (요청)
                             datetime.strptime(end_tw, "%H:%M").time()]  # 하차 가능시간
         self.work_time = work_time      # 하차 작업시간
         self.terminal_ID = terminal_ID  # 터미널ID (출발지)
-        self.start_coord = [start_latitude, start_longitude] # 터미널 좌표
+        # self.start_coord = [start_latitude, start_longitude] # 터미널 좌표
         self.date = date    # 주물 발생 날짜
         self.group = Group  # 그룹
 
@@ -40,13 +40,13 @@ class Order: # 입력 데이터: car (요청)
         return str(self.ord_no)
 
 class Car: # 이동 차량
-    def __init__(self, VehicleID, max_capa, start_center,fixed_cost, variable_cost, latitude, longitude):
+    def __init__(self, VehicleID, max_capa, start_center,fixed_cost, variable_cost):
         self.vehicle_id = VehicleID
         self.start_center = start_center
-        self.coord = [latitude,longitude]
         self.max_capa = max_capa    # 적재 capa_max
         self.fixed_cost = fixed_cost    # 차량 고정비
         self.variable_cost = variable_cost  # 차량 변동비
+        self.fixed_cost_incurred = False    # 고정비가 계산이 되었는지
 
     def initialize(self):   # 결과 테이블
         self.served_order = []
@@ -62,6 +62,7 @@ class Car: # 이동 차량
         self.total_fixed_cost = 0  # 누적된 차량 고정비
         self.total_variable_cost = 0  # 누적된 차량 변동비
 
+
     def loading(self, target: Order):   # 상차 작업
         if not self.doable(target): raise Exception('Infeasible Loading!')
         target.delivered = True
@@ -73,11 +74,16 @@ class Car: # 이동 차량
         self.volume += target.cbm
         self.total_volume += target.cbm
         self.conut += 1
-        self.coord = target.start_coord
+        # self.coord = target.start_coord
         self.served_order.append(target)
         self.start_center = target.terminal_ID
         self.can_move = False
+        self.loaded_order = True
+        self.total_variable_cost += self.variable_cost * self.dist  # 누적된 차량 변동비
         target.vehicle_id = self.vehicle_id
+        if not self.fixed_cost_incurred:
+            self.total_fixed_cost += self.fixed_cost
+            self.fixed_cost_incurred = True
 
     def unloading(self, target: Order):     # 하차 작업
         self.volume = 0     # 차량 적재량 0으로 만들기
@@ -85,6 +91,7 @@ class Car: # 이동 차량
         self.travel_distance += dist
         self.travel_time += time
         self.start_center = target.arrive_id
+        self.total_variable_cost += self.variable_cost * self.dist
         self.can_move = True
 
 
