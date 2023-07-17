@@ -31,7 +31,8 @@ def rule_solver(prob_instance):
 
     a = 0
     b = 0
-
+    load = 0
+    unload = 0
     for date in date_list:
         for group in range(4):
             group_orders = [
@@ -65,8 +66,12 @@ def rule_solver(prob_instance):
                             b += 1
         print(date, '총 상차 주문 수:', a)
         print(date, '총 하차 주문 수:', b)
+        load += a
+        unload += b
         a = 0
         b = 0
+    print('상차 작업 완료 수', load)
+    print('하차 작업 완료 수', unload)
 
     objective = 0
     for car in car_list:    # 운영비용 계산
