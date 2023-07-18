@@ -18,8 +18,11 @@ class Order: # 입력 데이터: car (요청)
         self.final_coord = [arrive_latitude,arrive_longitude]   # 도착지 좌표
         self.arrive_id = arrive_ID  # 도착지 ID
         self.cbm = CBM  # 상품 CBM
-        self.time_window = [datetime.strptime(start_tw, "%H:%M").time(),
-                            datetime.strptime(end_tw, "%H:%M").time()]  # 하차 가능시간
+        self.time_window = [
+            datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
+            datetime.strptime(f"2023-05-01 {end_tw}", "%Y-%m-%d %H:%M")
+        ]
+
         self.work_time = work_time      # 하차 작업시간
         self.terminal_ID = terminal_ID  # 터미널ID (출발지)
         # self.start_coord = [start_latitude, start_longitude] # 터미널 좌표
@@ -47,6 +50,7 @@ class Car: # 이동 차량
         self.fixed_cost = fixed_cost    # 차량 고정비
         self.variable_cost = variable_cost  # 차량 변동비
         self.fixed_cost_incurred = False    # 고정비가 계산이 되었는지
+        self.now_time = datetime.strptime("2023-05-01 00:00", "%Y-%m-%d %H:%M")
 
     def initialize(self):   # 결과 테이블
         self.served_order = []
@@ -84,6 +88,7 @@ class Car: # 이동 차량
         if not self.fixed_cost_incurred:
             self.total_fixed_cost += self.fixed_cost
             self.fixed_cost_incurred = True
+        self.now_time += timedelta(minutes=time)
 
     def unloading(self, target: Order):     # 하차 작업
         self.volume = 0     # 차량 적재량 0으로 만들기
@@ -93,16 +98,24 @@ class Car: # 이동 차량
         self.start_center = target.arrive_id
         self.total_variable_cost += self.variable_cost * self.dist
         self.can_move = True
+        self.now_time += timedelta(minutes=time)
 
 
     def doable(self, target: Order) -> bool: # -> return 값 힌트
+        load_dist, load_time = distance.calculate_distance_time(self.start_center, target.terminal_ID)
+        unload_dist, unload_time = distance.calculate_distance_time(target.terminal_ID, target.arrive_id)
+        target_time = datetime(self.now_time.year, self.now_time.month, self.now_time.day,
+                               target.time_window[1].hour, target.time_window[1].minute)
         if target.delivered:    # 아직 미완료 주문만 처리
             return False
-        # elif self.can_move == False:
-        #     return False
         elif self.max_capa < self.volume + target.cbm:  # 상품을 차에 실을 수 있는지 (적재량)
             return False
-        #elif target.time_window[1] < self.dist + 출발시간
+        elif target_time < datetime(self.now_time.year, self.now_time.month, self.now_time.day) + timedelta(
+                minutes=load_time) + timedelta(minutes=unload_time):
+            return False
+
+            return False
+
         # 이동 시간 고려 조건 추가
         else:
             return True
