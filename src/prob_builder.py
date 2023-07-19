@@ -100,7 +100,6 @@ class Car: # 이동 차량
         self.can_move = True
         self.now_time += timedelta(minutes=time)
 
-
     def doable(self, target: Order) -> bool: # -> return 값 힌트
         load_dist, load_time = distance.calculate_distance_time(self.start_center, target.terminal_ID)
         unload_dist, unload_time = distance.calculate_distance_time(target.terminal_ID, target.arrive_id)
@@ -113,10 +112,6 @@ class Car: # 이동 차량
         elif target_time < datetime(self.now_time.year, self.now_time.month, self.now_time.day) + timedelta(
                 minutes=load_time) + timedelta(minutes=unload_time):
             return False
-
-            return False
-
-        # 이동 시간 고려 조건 추가
         else:
             return True
 

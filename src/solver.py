@@ -17,7 +17,7 @@ def rule_solver(prob_instance):
         1: [datetime.strptime("07:00", "%H:%M").time(), datetime.strptime("10:00", "%H:%M").time()],
         2: [datetime.strptime("07:00", "%H:%M").time(), datetime.strptime("10:00", "%H:%M").time(),
             datetime.strptime("13:00", "%H:%M").time()],
-        3: [datetime.strptime("13:00", "%H:%M").time(), datetime.strptime("18:00", "%H:%M").time()]
+        3: [datetime.strptime("18:00", "%H:%M").time()]
     }
 
     date_list = [
@@ -56,7 +56,7 @@ def rule_solver(prob_instance):
             for order in group_orders:   # 상차 작업
                 try:
                     filtered_cars = list(filter(lambda car: car.start_center == order.terminal_ID and car.doable(order),
-                               car_list))   # 차의 현재 위치와 물건의 출발 위치가 가능한 차량 추출 + 배달 가능 여부 판단
+                               car_list))   # 차의 현재 위치와 물건의 출발 위치가 동일한 차량 추출 + 배달 가능 여부 판단
                     if filtered_cars:
                         closest_car = min(  # 추출된 차량이 여러 대라면 차량의 현재 위치와 상품의 도착 위치가 제일 가까운 차량으로 배정
                             filtered_cars,
@@ -74,6 +74,11 @@ def rule_solver(prob_instance):
                     a += 1
                 except:
                     pending_orders.append(order)    # 만일 상품을 운반할 차량이 없다면 다음 group에서 처리하기 위해 pending_orders에 저장
+
+            # 하차 작업 순서 정렬
+            for car in [car for car in prob_instance.car_list if not car.can_move]:
+                car.served_order.sort(
+                    key=lambda order: distance.calculate_distance_time(car.start_center, order.arrive_id)[0])
 
             for car in prob_instance.car_list:  # 하차 작업
                 if car.can_move == False:
