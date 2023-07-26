@@ -1,6 +1,7 @@
 import copy
 import distance
 from datetime import datetime, timedelta
+import pandas as pd
 
 class Prob_Instance:
     def __init__(self):
@@ -117,3 +118,26 @@ class Car: # 이동 차량
 
     def __repr__(self):
         return str(self.vehicle_id)
+
+class Result: # 결과 테이블
+    def __init__(self, VehicleID, Count, Volume, TravelDistance, WorkTime, TravelTime, ServiceTime, WaitingTime, TotalCost, FixedCost, VariableCost):
+        self.VehicleId = VehicleID
+        self.Count = Count
+        self.Volume = Volume
+        self.TravelDistance = TravelDistance
+        self.WorkTime = WorkTime
+        self.TravelTime = TravelTime
+        self.ServiceTime = ServiceTime
+        self.WaitingTime = WaitingTime
+        self.TotalCost = TotalCost
+        self.FixedCost = FixedCost
+        self.VariableCost = VariableCost
+
+    def result_table(self):
+        pd.set_option('display.max_columns', None)
+        fields = ['VehicleID', 'Count', 'Volume', 'TravelDistance', 'WorkTime', 'TravelTime', 'ServiceTime',
+                  'WaitingTime', 'TotalCost', 'FixedCost', 'VariableCost']
+        df = pd.DataFrame(columns=fields,
+                          data=[[self.VehicleId, self.Count, self.Volume, self.TravelDistance, self.WorkTime,
+                                 self.TravelTime, self.ServiceTime, self.WaitingTime, self.TotalCost, self.FixedCost, self.VariableCost]])
+        return df
