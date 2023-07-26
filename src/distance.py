@@ -1,5 +1,6 @@
 import csv
 import pickle
+import os
 
 # 전역 변수로 데이터 저장
 data = None
@@ -11,7 +12,7 @@ def load_data():
 
     # CSV 파일 읽어오기
     data = {}
-    with open('C:\pythonProject4\data\\od_matrix.csv', 'r') as file:
+    with open(os.getenv("DATA_PATH") + '/od_matrix.csv', 'r') as file:
         reader = csv.reader(file)
         next(reader)  # 헤더 행 스킵
         for row in reader:
@@ -25,7 +26,7 @@ def load_data():
             data[departure][destination] = (distance, time)
 
     # pickle 파일로 저장
-    with open('C:\pythonProject4\data\\od_matrix.pkl', 'wb') as file:
+    with open('C:/Users/jkbae/PycharmProjects/CJ_PDP/data/od_matrix.pkl', 'wb') as file:
         pickle.dump(data, file)
 
 def calculate_distance_time(departure, destination):
