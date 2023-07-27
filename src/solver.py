@@ -94,13 +94,21 @@ def rule_solver(prob_instance):
         a = 0
         b = 0
     print('상차 작업 완료 수', load)
-    print('하차 작업 완료 수', unload)
+    print('하차 작업 완료 수', unload) # Count
 
     objective = 0
+    vehicleId = car_list[-1]
+
     for car in car_list:    # 운영비용 계산
         objective += car.total_fixed_cost + car.travel_distance * car.variable_cost
 
-    solution = {}
-    solution['Objective'] = objective
+    total_distance = sum(map(lambda car: car.travel_distance, car_list))
+    total_fixedCost = sum(map(lambda car: car.total_fixed_cost, car_list))
+    total_variableCost = sum(map(lambda car: car.variable_cost, car_list))
+    total_volume = sum(map(lambda car: car.max_capa, car_list))
 
-    return solution
+    solution = {}
+    solution['Objective'] = objective # TotalCost
+    # [vehicleId, unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost]
+    result_table = Result(vehicleId, unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost)
+    return result_table.result_table()
