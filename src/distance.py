@@ -26,7 +26,7 @@ def load_data():
             data[departure][destination] = (distance, time)
 
     # pickle 파일로 저장
-    with open('C:/Users/jkbae/PycharmProjects/CJ_PDP/data/od_matrix.pkl', 'wb') as file:
+    with open(os.getenv("DATA_PATH") + '/od_matrix.pkl', 'wb') as file:
         pickle.dump(data, file)
 
 def calculate_distance_time(departure, destination):

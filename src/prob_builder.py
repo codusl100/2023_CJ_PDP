@@ -100,6 +100,8 @@ class Car: # 이동 차량
         self.total_variable_cost += self.variable_cost * self.dist
         self.can_move = True
         self.now_time += timedelta(minutes=time)
+        if time != 0:
+            self.now_time += timedelta(minutes=60)
 
     def doable(self, target: Order) -> bool: # -> return 값 힌트
         load_dist, load_time = distance.calculate_distance_time(self.start_center, target.terminal_ID)
