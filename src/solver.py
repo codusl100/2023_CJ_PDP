@@ -92,8 +92,6 @@ def rule_solver(prob_instance):
                 if car.can_move == False:
                     for order in car.served_order:
                         if order in group_orders:
-                            if distance.calculate_distance_time(car.start_center, order.arrive_id)[0] != 0:
-                                car.now_time += timedelta(minutes=60)
                             car.unloading(order)
                             unload += 1
                     car.served_order = []
