@@ -19,10 +19,16 @@ class Order: # 입력 데이터: car (요청)
         self.final_coord = [arrive_latitude,arrive_longitude]   # 도착지 좌표
         self.arrive_id = arrive_ID  # 도착지 ID
         self.cbm = CBM  # 상품 CBM
-        self.time_window = [
-            datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
-            datetime.strptime(f"2023-05-01 {end_tw}", "%Y-%m-%d %H:%M")
-        ]
+        if start_tw > end_tw:
+            self.time_window = [
+                datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
+                datetime.strptime(f"2023-05-02 {end_tw}", "%Y-%m-%d %H:%M")
+            ]
+        else:
+            self.time_window = [
+                datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
+                datetime.strptime(f"2023-05-01 {end_tw}", "%Y-%m-%d %H:%M")
+            ]
 
         self.work_time = work_time      # 하차 작업시간
         self.terminal_ID = terminal_ID  # 터미널ID (출발지)
@@ -106,14 +112,21 @@ class Car: # 이동 차량
     def doable(self, target: Order) -> bool: # -> return 값 힌트
         load_dist, load_time = distance.calculate_distance_time(self.start_center, target.terminal_ID)
         unload_dist, unload_time = distance.calculate_distance_time(target.terminal_ID, target.arrive_id)
-        target_time = datetime(self.now_time.year, self.now_time.month, self.now_time.day,
-                               target.time_window[1].hour, target.time_window[1].minute)
-        if target.delivered:    # 아직 미완료 주문만 처리
+        max_range = datetime(self.now_time.year, self.now_time.month, self.now_time.day) + timedelta(days=3) # 72시간 이내
+        if load_time >= 60 or unload_time >= 60:
+            load_hours, load_minutes = divmod(load_time, 60)
+            unload_hours, unload_minutes = divmod(unload_time, 60)
+            car_time = datetime(self.now_time.year, self.now_time.month, self.now_time.day) \
+                       + timedelta(hours=load_hours) + timedelta(hours=unload_hours) + timedelta(minutes=load_time) + timedelta(minutes=unload_time)  # 차량 처리하기까지 걸리는 시간
+
+        else:
+            car_time = datetime(self.now_time.year, self.now_time.month, self.now_time.day) \
+                       + timedelta(minutes=load_time) + timedelta(minutes=unload_time) # 차량 처리하기까지 걸리는 시간
+        if target.delivered:    # 아직 미완료 주문만 처리w_time.month,
             return False
         elif self.max_capa < self.volume + target.cbm:  # 상품을 차에 실을 수 있는지 (적재량)
             return False
-        elif target_time < datetime(self.now_time.year, self.now_time.month, self.now_time.day) + timedelta(
-                minutes=load_time) + timedelta(minutes=unload_time):
+        elif car_time > max_range: # 72시간 이내 처리되는지
             return False
         else:
             return True
