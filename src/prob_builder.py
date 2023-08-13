@@ -19,16 +19,10 @@ class Order: # 입력 데이터: car (요청)
         self.final_coord = [arrive_latitude,arrive_longitude]   # 도착지 좌표
         self.arrive_id = arrive_ID  # 도착지 ID
         self.cbm = CBM  # 상품 CBM
-        if start_tw > end_tw:
-            self.time_window = [
-                datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
-                datetime.strptime(f"2023-05-02 {end_tw}", "%Y-%m-%d %H:%M")
-            ]
-        else:
-            self.time_window = [
+        self.time_window = [
                 datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
                 datetime.strptime(f"2023-05-01 {end_tw}", "%Y-%m-%d %H:%M")
-            ]
+        ]
 
         self.work_time = work_time      # 하차 작업시간
         self.terminal_ID = terminal_ID  # 터미널ID (출발지)
