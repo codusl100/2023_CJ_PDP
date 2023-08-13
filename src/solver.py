@@ -15,8 +15,8 @@ def assign_order_to_car(order, car_list):
 
 def perform_loading(order, car, date, group_list):
     car.loading(order)
-    if car.now_time < datetime.strptime(date + group_list[order.group], "%Y-%m-%d%H:%M"):
-        car.now_time = datetime.strptime(date + group_list[order.group], "%Y-%m-%d%H:%M")
+    target_time = datetime.strptime(date + group_list[order.group], "%Y-%m-%d%H:%M")
+    car.now_time = max(car.now_time, target_time)
     car.completed_orders.append(order)
 
 def rule_solver(prob_instance):
@@ -105,7 +105,7 @@ def rule_solver(prob_instance):
                         load += 1
                         delay += 1
 
-                for car in [car for car in car_list if not car.can_move]:
+                for car in filter(lambda car: not car.can_move, car_list):
                     car.served_order.sort(
                         key=lambda order: distance.calculate_distance_time(car.start_center, order.arrive_id)[0])
 
@@ -144,6 +144,5 @@ def rule_solver(prob_instance):
 
     solution = {}
     solution['Objective'] = objective # TotalCost
-    # [vehicleId, unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost]
-    result_table = Result(vehicleId, unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost)
+    result_table = Result(vehicleId, total_unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost)
     return result_table.result_table()

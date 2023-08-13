@@ -16,14 +16,8 @@ def load_data():
         reader = csv.reader(file)
         next(reader)  # 헤더 행 스킵
         for row in reader:
-            departure = row[0]
-            destination = row[1]
-            distance = float(row[2])
-            time = float(row[3])
-
-            if departure not in data:
-                data[departure] = {}
-            data[departure][destination] = (distance, time)
+            departure, destination, distance, time = row[:4]
+            data.setdefault(departure, {})[destination] = (float(distance), float(time))
 
     # pickle 파일로 저장
     with open(os.getenv("DATA_PATH") + '/od_matrix.pkl', 'wb') as file:
