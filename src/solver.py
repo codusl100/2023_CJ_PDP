@@ -15,8 +15,8 @@ def assign_order_to_car(order, car_list):
 
 def perform_loading(order, car, date, group_list):
     car.loading(order)
-    if car.now_time < datetime.strptime(date + group_list[order.group], "%Y-%m-%d%H:%M"):
-        car.now_time = datetime.strptime(date + group_list[order.group], "%Y-%m-%d%H:%M")
+    target_time = datetime.strptime(date + group_list[order.group], "%Y-%m-%d%H:%M")
+    car.now_time = max(car.now_time, target_time)
     car.completed_orders.append(order)
 
 def rule_solver(prob_instance):
@@ -56,10 +56,12 @@ def rule_solver(prob_instance):
         '18:00'
     ]
 
+    orderResult_table = OrderResult(None, None, None, None, None, None, None, None, None) # 맨 첫 항 다 None이라 지워야함
     load = 0
     unload = 0
     total_load = 0
     total_unload = 0
+    sequence = 0 # 할당된 배송 시퀀스
     pending_orders = []
 
     for date in date_list:
@@ -93,6 +95,9 @@ def rule_solver(prob_instance):
                     for order in car.served_order:
                         if order in group_orders:
                             car.unloading(order)
+                            orderResult_table.add_row(Order_No=order.ord_no, VehicleID=car.vehicle_id, Sequence=0,
+                                                      SiteCode=car.start_center, Delivered=0)
+                            print(orderResult_table.get_order_table())  # -> 예시입니당 이 테이블에 값 넣을 때 (add_row) 주문 배치될 때 넣어야하니까 위치 파악하고 코드 넣어야함!
                             unload += 1
                     car.served_order = []
 
@@ -105,7 +110,7 @@ def rule_solver(prob_instance):
                         load += 1
                         delay += 1
 
-                for car in [car for car in car_list if not car.can_move]:
+                for car in filter(lambda car: not car.can_move, car_list):
                     car.served_order.sort(
                         key=lambda order: distance.calculate_distance_time(car.start_center, order.arrive_id)[0])
 
@@ -144,6 +149,5 @@ def rule_solver(prob_instance):
 
     solution = {}
     solution['Objective'] = objective # TotalCost
-    # [vehicleId, unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost]
-    result_table = Result(vehicleId, unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost)
-    return result_table.result_table()
+    result_table = CarResult(vehicleId, total_unload, total_volume, total_distance, 0, 0, 0, 0, objective, total_fixedCost, total_variableCost)
+    return result_table.car_table()

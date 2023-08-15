@@ -19,16 +19,10 @@ class Order: # 입력 데이터: car (요청)
         self.final_coord = [arrive_latitude,arrive_longitude]   # 도착지 좌표
         self.arrive_id = arrive_ID  # 도착지 ID
         self.cbm = CBM  # 상품 CBM
-        if start_tw > end_tw:
-            self.time_window = [
-                datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
-                datetime.strptime(f"2023-05-02 {end_tw}", "%Y-%m-%d %H:%M")
-            ]
-        else:
-            self.time_window = [
+        self.time_window = [
                 datetime.strptime(f"2023-05-01 {start_tw}", "%Y-%m-%d %H:%M"),
                 datetime.strptime(f"2023-05-01 {end_tw}", "%Y-%m-%d %H:%M")
-            ]
+        ]
 
         self.work_time = work_time      # 하차 작업시간
         self.terminal_ID = terminal_ID  # 터미널ID (출발지)
@@ -134,7 +128,31 @@ class Car: # 이동 차량
     def __repr__(self):
         return str(self.vehicle_id)
 
-class Result: # 결과 테이블
+class OrderResult: # 주문 결과 테이블
+    def __init__(self, Order_No, VehicleID, Sequence, SiteCode, ArrivalTime, WaitingTime, ServiceTime, DepartureTime, Delivered):
+        self.Order_No = Order_No
+        self.VehicleId = VehicleID
+        self.Sequence = Sequence
+        self.SiteCode = SiteCode
+        self.ArrivalTime = ArrivalTime
+        self.WaitingTime = WaitingTime
+        self.ServiceTime = ServiceTime
+        self.DepartureTime = DepartureTime
+        self.Delivered = Delivered
+        self.columns = ['ORD_NO', 'VehicleID', 'Sequence', 'SiteCode', 'ArrivalTime', 'WaitingTime', 'ServiceTime', 'DepartureTime', 'Delivered']
+        self.df = pd.DataFrame(columns=self.columns, data=[[self.Order_No, self.VehicleId, self.Sequence, self.SiteCode, self.ArrivalTime, self.WaitingTime, self.ServiceTime, self.DepartureTime, self.Delivered]])
+        pd.set_option('display.max_columns', None)
+
+    def add_row(self, Order_No, VehicleID, Sequence, SiteCode, Delivered, ArrivalTime=None, WaitingTime=None, ServiceTime=None, DepartureTime=None):
+        new_row = pd.Series([Order_No, VehicleID, Sequence, SiteCode, ArrivalTime, WaitingTime, ServiceTime, DepartureTime, Delivered], index=self.columns)
+        self.df.loc[len(self.df)] = new_row
+    def update_row(self, row_index, column_name, new_value):
+        self.df.at[row_index, column_name] = new_value
+
+    def get_order_table(self):
+        return self.df
+
+class CarResult: # 차량 배차 결과 테이블
     def __init__(self, VehicleID, Count, Volume, TravelDistance, WorkTime, TravelTime, ServiceTime, WaitingTime, TotalCost, FixedCost, VariableCost):
         self.VehicleId = VehicleID
         self.Count = Count
@@ -148,7 +166,7 @@ class Result: # 결과 테이블
         self.FixedCost = FixedCost
         self.VariableCost = VariableCost
 
-    def result_table(self):
+    def car_table(self):
         pd.set_option('display.max_columns', None)
         fields = ['VehicleID', 'Count', 'Volume', 'TravelDistance', 'WorkTime', 'TravelTime', 'ServiceTime',
                   'WaitingTime', 'TotalCost', 'FixedCost', 'VariableCost']
